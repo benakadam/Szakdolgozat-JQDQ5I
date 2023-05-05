@@ -1,6 +1,7 @@
 ﻿using AForge.Video.DirectShow;
 using Projekt.Controller;
 using System.Configuration;
+using System.Xml.Linq;
 using System.Xml.Serialization;
 
 namespace Projekt.View;
@@ -73,18 +74,13 @@ public partial class SetupControl : MainControl
         }
         try
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(Config));
-            Config config = new Config();
-            using (StreamReader reader = new StreamReader(configPath))
-            {
-                config = (Config)serializer.Deserialize(reader);
-            }
+            XDocument document = XDocument.Load(configPath);
+            if (document.Root == null) return;
 
-            txtPythonPath.Text = config.PythonPath;
-            txtSavePicturesPath.Text = config.SavePicturesPath;
-            cboCameras.SelectedIndex = config.SelectedCameraIndex;
-            txtLearningDirectoryPath.Text = config.LearningDirectoryPath;
-            txtStationID.Text = config.StationID;
+            txtPythonPath.Text = document.Root.Element("pythonPath")?.Value ?? "";
+            txtSavePicturesPath.Text = document.Root.Element("savePicturesPath")?.Value ?? "";
+            cboCameras.SelectedIndex = int.TryParse(document.Root.Element("selectedCameraIndex")?.Value, out int selectedIndex) ? selectedIndex : 0;
+            txtStationID.Text = document.Root.Element("stationID")?.Value ?? "";
         }
         catch (InvalidOperationException _)
         {
@@ -160,21 +156,20 @@ public partial class SetupControl : MainControl
     /// <param name="e"></param>
     private void btnSave_Click(object sender, EventArgs e)
     {
-        Config config = new Config()
-        {
-            PythonPath = txtPythonPath.Text,
-            SavePicturesPath = txtSavePicturesPath.Text,
-            SelectedCameraIndex = cboCameras.SelectedIndex,
-            LearningDirectoryPath = txtLearningDirectoryPath.Text,
-            StationID = txtStationID.Text
-        };
-
-        XmlSerializer serializer = new XmlSerializer(typeof(Config));
+        XDocument document = new XDocument(
+            new XElement("config",
+                new XElement("pythonPath", txtPythonPath.Text),
+                new XElement("savePicturesPath", txtSavePicturesPath.Text),
+                new XElement("selectedCameraIndex", cboCameras.SelectedIndex),
+                new XElement("stationID", txtStationID.Text)
+            )
+        );
 
         using (StreamWriter writer = new StreamWriter(configPath))
         {
-            serializer.Serialize(writer, config);
+            writer.Write(document.ToString());
         }
+
 
         SavePaths();
 
