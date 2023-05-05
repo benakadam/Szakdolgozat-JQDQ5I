@@ -34,9 +34,9 @@
             // pnlImages
             // 
             pnlImages.Dock = DockStyle.Bottom;
-            pnlImages.Location = new Point(0, 511);
+            pnlImages.Location = new Point(0, 521);
             pnlImages.Name = "pnlImages";
-            pnlImages.Size = new Size(923, 163);
+            pnlImages.Size = new Size(923, 184);
             pnlImages.TabIndex = 14;
             // 
             // MainView
@@ -44,7 +44,7 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(46, 51, 73);
-            ClientSize = new Size(923, 674);
+            ClientSize = new Size(923, 705);
             Controls.Add(pnlImages);
             FormBorderStyle = FormBorderStyle.None;
             Margin = new Padding(3, 2, 3, 2);

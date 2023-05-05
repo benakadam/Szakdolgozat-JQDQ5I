@@ -9,6 +9,8 @@ public class PicturePanel : Panel
 {
     public string Name { get; set; }
 
+    public Label Result { get; set; }
+
     private Label _title;
     private Button _btnExit;
     public PictureBox _pic;
@@ -29,13 +31,23 @@ public class PicturePanel : Panel
         Controls.Add(_pic);
         #endregion
 
+        #region SetResult
+        Result = new Label();
+        Result.Text = "Keresés";
+        Result.TextAlign = ContentAlignment.MiddleCenter;
+        Result.BackColor = Color.Transparent;
+        Result.ForeColor = Color.White;
+        Result.Location = new Point((_pic.Width - Result.Width) / 2, _pic.Height);
+        Controls.Add(Result);
+        #endregion
+
         #region SetLabel
         _title = new Label();
         _title.Text = title;
         _title.TextAlign = ContentAlignment.MiddleCenter;
         _title.BackColor = Color.Transparent;
         _title.ForeColor = Color.White;
-        _title.Location = new Point((_pic.Width - _title.Width) / 2, _pic.Height);
+        _title.Location = new Point((_pic.Width - _title.Width) / 2, _pic.Height + Result.Height);
         Controls.Add(_title);
         #endregion
 
@@ -52,7 +64,7 @@ public class PicturePanel : Panel
         _pic.Controls.Add(_btnExit);
         #endregion
 
-        Height = _pnlImageHeight + _title.Height;
+        Height = _pnlImageHeight + _title.Height + Result.Height;
         Width = _pnlImageWidth;
         pnlImages.Controls.Add(this);
         ReorderImages();

@@ -37,6 +37,8 @@
             btnPythonPath = new Button();
             btnSave = new Button();
             pnlSettings = new Panel();
+            txtLearningDirectoryPath = new TextBox();
+            btnLearningDirectory = new Button();
             label1 = new Label();
             txtStationID = new TextBox();
             pnlDetails = new Panel();
@@ -86,7 +88,7 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(38, 118);
+            label3.Location = new Point(38, 165);
             label3.Name = "label3";
             label3.Size = new Size(145, 18);
             label3.TabIndex = 14;
@@ -95,7 +97,7 @@
             // cboCameras
             // 
             cboCameras.FormattingEnabled = true;
-            cboCameras.Location = new Point(204, 116);
+            cboCameras.Location = new Point(204, 163);
             cboCameras.Margin = new Padding(3, 2, 3, 2);
             cboCameras.Name = "cboCameras";
             cboCameras.Size = new Size(146, 26);
@@ -145,7 +147,7 @@
             // 
             // btnSave
             // 
-            btnSave.Location = new Point(673, 102);
+            btnSave.Location = new Point(673, 149);
             btnSave.Margin = new Padding(3, 2, 3, 2);
             btnSave.Name = "btnSave";
             btnSave.Size = new Size(102, 34);
@@ -158,6 +160,8 @@
             // 
             pnlSettings.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             pnlSettings.BackColor = SystemColors.ControlDark;
+            pnlSettings.Controls.Add(txtLearningDirectoryPath);
+            pnlSettings.Controls.Add(btnLearningDirectory);
             pnlSettings.Controls.Add(label1);
             pnlSettings.Controls.Add(txtStationID);
             pnlSettings.Controls.Add(btnPythonPath);
@@ -170,13 +174,34 @@
             pnlSettings.Location = new Point(0, 0);
             pnlSettings.Margin = new Padding(3, 2, 3, 2);
             pnlSettings.Name = "pnlSettings";
-            pnlSettings.Size = new Size(923, 169);
+            pnlSettings.Size = new Size(923, 213);
             pnlSettings.TabIndex = 18;
+            // 
+            // txtLearningDirectoryPath
+            // 
+            txtLearningDirectoryPath.Enabled = false;
+            txtLearningDirectoryPath.Location = new Point(167, 120);
+            txtLearningDirectoryPath.Margin = new Padding(3, 2, 3, 2);
+            txtLearningDirectoryPath.Name = "txtLearningDirectoryPath";
+            txtLearningDirectoryPath.Size = new Size(608, 25);
+            txtLearningDirectoryPath.TabIndex = 21;
+            // 
+            // btnLearningDirectory
+            // 
+            btnLearningDirectory.ForeColor = Color.Black;
+            btnLearningDirectory.Location = new Point(24, 115);
+            btnLearningDirectory.Margin = new Padding(3, 2, 3, 2);
+            btnLearningDirectory.Name = "btnLearningDirectory";
+            btnLearningDirectory.Size = new Size(137, 35);
+            btnLearningDirectory.TabIndex = 20;
+            btnLearningDirectory.Text = "Tanító könyvtár:";
+            btnLearningDirectory.UseVisualStyleBackColor = true;
+            btnLearningDirectory.Click += btnLearningDirectory_Click;
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(372, 118);
+            label1.Location = new Point(372, 165);
             label1.Name = "label1";
             label1.Size = new Size(107, 18);
             label1.TabIndex = 19;
@@ -184,7 +209,7 @@
             // 
             // txtStationID
             // 
-            txtStationID.Location = new Point(495, 118);
+            txtStationID.Location = new Point(495, 165);
             txtStationID.Name = "txtStationID";
             txtStationID.Size = new Size(128, 25);
             txtStationID.TabIndex = 18;
@@ -320,5 +345,7 @@
         private Label label4;
         private TextBox txtHeight;
         private Label label2;
+        private TextBox txtLearningDirectoryPath;
+        private Button btnLearningDirectory;
     }
 }

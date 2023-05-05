@@ -14,13 +14,14 @@ public partial class CameraControl : MainControl
     Image snapshot;
     public Panel pnlImages = MainView.Instance.pnlImages;
     public string selectedCamera;
-    public string _pythonPath;
-    public string _imagesPath;
     bool _isProcessing = false;
     private readonly string snapshotPath = ConfigurationManager.AppSettings["SnapshotPath"];
     private readonly string loadingImage = ConfigurationManager.AppSettings["LoadingImagePath"];
     private readonly string croppedImage = ConfigurationManager.AppSettings["CroppedImagePath"];
     private readonly string backgroundImage = ConfigurationManager.AppSettings["BackgroundImagePath"];
+    private readonly string vectorPath = ConfigurationManager.AppSettings["VectorPath"];
+    private readonly string queryImage = ConfigurationManager.AppSettings["QueryImagePath"];
+    private readonly string learningDirectoryPath = ConfigurationManager.AppSettings["LearningDirectoryPath"];
     #endregion
 
 
@@ -144,6 +145,8 @@ public partial class CameraControl : MainControl
     /// <param name="sender"></param>
     /// <param name="e"></param>
     private void btnProcessImage_Click(object sender, EventArgs e) => ProcessImage();
+
+
     /// <summary>
     /// Feldolgozza a képet
     /// </summary>
@@ -157,7 +160,8 @@ public partial class CameraControl : MainControl
             snapshot.Save(snapshotPath);
             picboxCropped.Image = Image.FromFile(loadingImage);
 
-            await Task.Run(() => _cameraController.ImageProcess(_pythonPath));
+            await Task.Run(() => _cameraController.ImageProcess());
+
         }
         catch (ImageProcessException ex)
         {
@@ -212,7 +216,6 @@ public partial class CameraControl : MainControl
             ResultControl control = new ResultControl();
             control.Dock = DockStyle.Fill;
             control.textbox.Text = "tüskevár";
-            control._imagesPath = _imagesPath;
             control.StartCameraControl += StartCamera;
             MainView.Instance.Controls.Add(control);
         }
@@ -236,7 +239,7 @@ public partial class CameraControl : MainControl
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    private void btnSave_Click(object sender, EventArgs e)
+    private async void btnSave_Click(object sender, EventArgs e)
     {
         if (picboxCropped.Image == null || _isProcessing) return;
 
@@ -249,11 +252,31 @@ public partial class CameraControl : MainControl
         {
             MessageBox.Show("Nincs típus kiválasztva!");
             return;
-        }
+        }        
 
         PicturePanel pic = new PicturePanel(cboImageType.Text, picboxCropped.Image);
         pnlImages.Controls.Add(pic);
-
         cboImageType.SelectedIndex = -1;
+
+
+        if (string.IsNullOrEmpty(learningDirectoryPath))
+        {
+            pic.Result.Text = "";
+            return;
+        }
+        string result = "";
+        File.Copy(croppedImage, queryImage, true);
+        while (true)
+        {
+            if (File.Exists(vectorPath))
+            {
+                result = await Task.Run(() => _cameraController.SearchSimilarPhoto());
+                break;
+            }
+            await Task.Delay(100); 
+
+        }
+        pic.Result.Text = result.TrimEnd('\r', '\n');       
+
     }
 }

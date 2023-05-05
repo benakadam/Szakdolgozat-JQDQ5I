@@ -11,13 +11,23 @@ public class CameraController
     /// <summary>
     /// Meghívja a képet feldolgozó Python kódot
     /// </summary>
-    /// <param name="pythonPath"></param>
     /// <returns></returns>
-    public Task ImageProcess(string pythonPath)
+    public Task ImageProcess()
     {
-        _pythonExecute.ExecutePython(pythonPath);
+        _pythonExecute.ProcessImage();
 
         return Task.CompletedTask;
+    }
+
+
+    /// <summary>
+    /// Meghívja a hasonló képet kereső Pyton kódot
+    /// </summary>
+    /// <returns></returns>
+    public async Task<string> SearchSimilarPhoto()
+    {
+        return _pythonExecute.SearchSimilarPhoto();
+        
     }
 
 
@@ -52,4 +62,5 @@ public class CameraController
 
         return destImage;
     }
+
 }

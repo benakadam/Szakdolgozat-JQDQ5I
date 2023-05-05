@@ -1,6 +1,7 @@
 ﻿using Projekt.Controller;
 using Projekt.Exception;
 using Projekt.Model;
+using System.Configuration;
 using System.Text;
 
 namespace Projekt.View;
@@ -17,8 +18,7 @@ public partial class ResultControl : MainControl
     private readonly ResultController _resultController = new ResultController();
     public List<SearchResult> searchResults = new List<SearchResult>();
     public Panel pnlImages = MainView.Instance.pnlImages;
-    public string _imagesPath;
-
+    private readonly string _imagesPath = ConfigurationManager.AppSettings["ImagesSavePath"];
     #endregion
 
 

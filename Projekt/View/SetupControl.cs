@@ -1,6 +1,8 @@
 ﻿using AForge.Video.DirectShow;
+using Projekt.Controller;
 using System.Configuration;
-using System.Text;
+using System.Xml.Serialization;
+
 namespace Projekt.View;
 
 public partial class SetupControl : MainControl
@@ -10,6 +12,8 @@ public partial class SetupControl : MainControl
     public event CameraDelegate StartCameraControl;
     FilterInfoCollection filterInfoCollection;
     private readonly string configPath = ConfigurationManager.AppSettings["ConfigPath"];
+    private readonly string vectorPath = ConfigurationManager.AppSettings["VectorPath"];
+    readonly SetupController _setupController = new SetupController();
 
 
     public SetupControl()
@@ -41,13 +45,13 @@ public partial class SetupControl : MainControl
             cameraCon.Dock = DockStyle.Fill;
             MainView.Instance.Controls.Add(cameraCon);
             cameraCon.selectedCamera = cboCameras.SelectedIndex == -1 ? null : filterInfoCollection[cboCameras.SelectedIndex].MonikerString;
-            cameraCon._imagesPath = txtSavePicturesPath.Text;
-            cameraCon._pythonPath = txtPythonPath.Text;
         }
         MainView.Instance.cameraCon = cameraCon;
         MainView.Instance.Controls["CameraControl"].BringToFront();
         cameraCon.StartCamera();
         MainView.Instance.pnlImages.BringToFront();
+
+        CalculateVectors();
     }
 
     /// <summary>
@@ -69,14 +73,26 @@ public partial class SetupControl : MainControl
         }
         try
         {
-            string[] lines = File.ReadAllLines(configPath);
-            txtPythonPath.Text = lines[0];
-            txtSavePicturesPath.Text = lines[1];
-            cboCameras.SelectedIndex = int.Parse(lines[2]);
+            XmlSerializer serializer = new XmlSerializer(typeof(Config));
+            Config config = new Config();
+            using (StreamReader reader = new StreamReader(configPath))
+            {
+                config = (Config)serializer.Deserialize(reader);
+            }
+
+            txtPythonPath.Text = config.PythonPath;
+            txtSavePicturesPath.Text = config.SavePicturesPath;
+            cboCameras.SelectedIndex = config.SelectedCameraIndex;
+            txtLearningDirectoryPath.Text = config.LearningDirectoryPath;
+            txtStationID.Text = config.StationID;
         }
-        catch { }
+        catch (InvalidOperationException _)
+        {
+            if (File.Exists(configPath)) File.Delete(configPath);           
+        }
+        catch (FileNotFoundException _){ }
 
-
+        SavePaths();
 
     }
 
@@ -85,31 +101,56 @@ public partial class SetupControl : MainControl
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    private void btnSavePicturesPath_Click(object sender, EventArgs e)
-    {
-        using (var dialog = new FolderBrowserDialog())
-        {
-            if (dialog.ShowDialog() == DialogResult.OK)
-            {
-                txtSavePicturesPath.Text = dialog.SelectedPath;
-            }
-        }
-    }
+    private void btnSavePicturesPath_Click(object sender, EventArgs e) => txtSavePicturesPath.Text = GetPathFromDialoge();
+
 
     /// <summary>
     /// Python útvonal gomb eseménykezelője
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    private void btnPythonPath_Click(object sender, EventArgs e)
+    private void btnPythonPath_Click(object sender, EventArgs e) => txtPythonPath.Text = GetPathFromDialoge();
+
+
+    /// <summary>
+    /// Tanító könyvtár gomb eseménykezelője
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void btnLearningDirectory_Click(object sender, EventArgs e)
+    {
+        string path = GetPathFromDialoge();
+        if (path == "") return;
+        string[] files = Directory.GetFiles(path);
+
+        foreach (string file in files)
+        {
+            string extension = Path.GetExtension(file);
+
+            if (extension != ".jpg" && extension != ".jpeg" && extension != ".png")
+            {
+                MessageBox.Show("A könyvtár nem csak képeket tartalmaz!");
+                return;
+            }
+        }
+        txtLearningDirectoryPath.Text = path;
+    }
+
+    /// <summary>
+    /// Lekérdezi az útvonalat a dialógusból
+    /// </summary>
+    /// <returns></returns>
+    private string GetPathFromDialoge()
     {
         using (var dialog = new FolderBrowserDialog())
         {
             if (dialog.ShowDialog() == DialogResult.OK)
             {
-                txtPythonPath.Text = dialog.SelectedPath;
+                return dialog.SelectedPath;
             }
+            return "";
         }
+
     }
 
     /// <summary>
@@ -119,18 +160,44 @@ public partial class SetupControl : MainControl
     /// <param name="e"></param>
     private void btnSave_Click(object sender, EventArgs e)
     {
-        StringBuilder save = new StringBuilder();
-        save.AppendLine(txtPythonPath.Text);
-        save.AppendLine(txtSavePicturesPath.Text);
-        save.AppendLine(cboCameras.SelectedIndex.ToString());
-        save.Append(txtStationID);
+        Config config = new Config()
+        {
+            PythonPath = txtPythonPath.Text,
+            SavePicturesPath = txtSavePicturesPath.Text,
+            SelectedCameraIndex = cboCameras.SelectedIndex,
+            LearningDirectoryPath = txtLearningDirectoryPath.Text,
+            StationID = txtStationID.Text
+        };
+
+        XmlSerializer serializer = new XmlSerializer(typeof(Config));
 
         using (StreamWriter writer = new StreamWriter(configPath))
         {
-            writer.Write(save.ToString());
+            serializer.Serialize(writer, config);
         }
+
+        SavePaths();
 
         MainView.Instance.Controls["CameraControl"]?.Dispose();
         MainView.Instance.Controls["ResultControl"]?.Dispose();
     }
+
+    private async Task CalculateVectors()
+    {
+        if (string.IsNullOrEmpty(txtLearningDirectoryPath.Text)) return;
+        if (!File.Exists(vectorPath))
+            await Task.Run(() => _setupController.CalculateVectors());
+        
+    }
+
+    void SavePaths()
+    {
+        _setupController.RefreshAppSettings("PythonPath", txtPythonPath.Text);
+        _setupController.RefreshAppSettings("ImagesSavePath", txtSavePicturesPath.Text);
+        _setupController.RefreshAppSettings("LearningDirectoryPath", txtLearningDirectoryPath.Text);
+    }
+
+
+
+
 }
