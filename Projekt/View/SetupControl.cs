@@ -2,7 +2,6 @@
 using Projekt.Controller;
 using System.Configuration;
 using System.Xml.Linq;
-using System.Xml.Serialization;
 
 namespace Projekt.View;
 
