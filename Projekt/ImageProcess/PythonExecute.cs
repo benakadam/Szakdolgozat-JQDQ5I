@@ -37,12 +37,12 @@ public class PythonExecute
 
             if (errors != "" && exitCode != 0)
             {
-                throw new ImageProcessException(errors);
+                throw new PythonExecuteException(errors);
             }
         }
         catch (System.ComponentModel.Win32Exception ex)
         {
-            throw new ImageProcessException(ex.Message);
+            throw new PythonExecuteException(ex.Message);
         }
         return results;
     }

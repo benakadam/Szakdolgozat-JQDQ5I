@@ -163,7 +163,7 @@ public partial class CameraControl : MainControl
             await Task.Run(() => _cameraController.ImageProcess());
 
         }
-        catch (ImageProcessException ex)
+        catch (PythonExecuteException ex)
         {
             MessageBox.Show(ex.Message);
             return;
@@ -270,7 +270,13 @@ public partial class CameraControl : MainControl
         {
             if (File.Exists(vectorPath))
             {
-                result = await Task.Run(() => _cameraController.SearchSimilarPhoto());
+                try
+                {
+                    result = await Task.Run(() => _cameraController.SearchSimilarPhoto());
+                } catch (PythonExecuteException ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
                 break;
             }
             await Task.Delay(100); 

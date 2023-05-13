@@ -4,12 +4,10 @@ using System.Configuration;
 namespace Projekt.Controller;
 public class SetupController
 {
-    PythonExecute _pythonExecute = new PythonExecute();
-
-
 
     public async Task CalculateVectors()
     {
+        PythonExecute _pythonExecute = new PythonExecute();
         _pythonExecute.CalculaterVectors();
     }
 

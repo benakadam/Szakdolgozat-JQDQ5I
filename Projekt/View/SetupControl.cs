@@ -1,5 +1,6 @@
 ﻿using AForge.Video.DirectShow;
 using Projekt.Controller;
+using Projekt.Exception;
 using System.Configuration;
 using System.Xml.Linq;
 
@@ -79,6 +80,7 @@ public partial class SetupControl : MainControl
             txtPythonPath.Text = document.Root.Element("pythonPath")?.Value ?? "";
             txtSavePicturesPath.Text = document.Root.Element("savePicturesPath")?.Value ?? "";
             cboCameras.SelectedIndex = int.TryParse(document.Root.Element("selectedCameraIndex")?.Value, out int selectedIndex) ? selectedIndex : 0;
+            txtLearningDirectoryPath.Text = document.Root.Element("learningDirectoryPath")?.Value ?? "";
             txtStationID.Text = document.Root.Element("stationID")?.Value ?? "";
         }
         catch (InvalidOperationException _)
@@ -160,6 +162,7 @@ public partial class SetupControl : MainControl
                 new XElement("pythonPath", txtPythonPath.Text),
                 new XElement("savePicturesPath", txtSavePicturesPath.Text),
                 new XElement("selectedCameraIndex", cboCameras.SelectedIndex),
+                new XElement("learningDirectoryPath", txtLearningDirectoryPath.Text),
                 new XElement("stationID", txtStationID.Text)
             )
         );
@@ -178,10 +181,15 @@ public partial class SetupControl : MainControl
 
     private async Task CalculateVectors()
     {
-        if (string.IsNullOrEmpty(txtLearningDirectoryPath.Text)) return;
-        if (!File.Exists(vectorPath))
-            await Task.Run(() => _setupController.CalculateVectors());
-        
+        try
+        {
+            if (string.IsNullOrEmpty(txtLearningDirectoryPath.Text)) return;
+            if (!File.Exists(vectorPath))
+                await Task.Run(() => _setupController.CalculateVectors());
+        } catch (PythonExecuteException ex)
+        {
+            MessageBox.Show(ex.Message);
+        }
     }
 
     void SavePaths()
